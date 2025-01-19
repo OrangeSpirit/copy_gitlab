@@ -1,2 +1,0 @@
-/usr/bin/ar qc libgiflib.a
-/usr/bin/ranlib libgiflib.a
