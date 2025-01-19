@@ -7,9 +7,10 @@
 #include <QLineEdit>
 #include <QSlider>
 #include <QPushButton>
-#include <QOpenGLWidget>  
-#include "parser.h"    
-#include "modelviewer.h" 
+#include <QOpenGLWidget>
+#include <QTimer>
+#include "parser.h"
+#include "modelviewer.h"
 
 class ModelViewer; 
 
@@ -32,7 +33,8 @@ private slots:
     void onScreenBMPButtonClicked();
     void onScreenGifButtonClicked();
 
- 
+    void update_gif();
+
 private:
     QLabel *fileNameLabel;     
     QLabel *vertexCountLabel;   
@@ -54,6 +56,8 @@ private:
     QPushButton *screenJpgButton;
     QPushButton *screenBMPButton;
     QPushButton *screenGifButton;
+
+    QTimer *timer;
 
     void setupUI();
     void createFileSelectionUI(QVBoxLayout* layout);

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgifimage.a CMakeFiles/gifimage.dir/qgifimage.cpp.o
+/usr/bin/ranlib libgifimage.a

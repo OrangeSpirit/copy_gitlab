@@ -16,11 +16,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     rotateZEdit(new QLineEdit(this)),
     rotateModelButton(new QPushButton("Rotate Model", nullptr)),
     scaleEdit(new QLineEdit(this)),
-    scaleModelButton(new QPushButton("Scale Model", nullptr))
+    scaleModelButton(new QPushButton("Scale Model", nullptr)),
+    timer(new QTimer(this))
 {
     setWindowTitle("3D Viewer");
     resize(1600, 1600); 
     setupUI();
+
+    connect(timer, SIGNAL(timeout()), this, SLOT(update_gif()));
 }
 
 MainWindow::~MainWindow() {}
@@ -248,8 +251,27 @@ void MainWindow::onScreenBMPButtonClicked()
     modelViewer->saveFrameAsBMP();
 }
 
-// Скрин в формате Gif
+// Скрин в формате Gif (640x480, 10fps, 5s)
 void MainWindow::onScreenGifButtonClicked()
 {
-    modelViewer->saveFrameAsGif();
+    modelViewer->startGif();
+    timer->start(100);
+}
+
+void MainWindow::update_gif() 
+{
+    if (modelViewer->getFrameCount() >= 0 && modelViewer->getFrameCount() < 50) {
+        modelViewer->addFrameToGif();
+    } else if (modelViewer->getFrameCount() >= 50) {
+        timer->stop();
+        QString filePath = QFileDialog::getSaveFileName(
+            this,
+            "Сохранить кадр",
+            QDir::currentPath(), // Стартовая директория
+            "Images (*.gif)"
+        );
+        modelViewer->endGif(filePath);
+    } else {
+        timer->stop();
+    }
 }

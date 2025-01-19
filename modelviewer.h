@@ -7,6 +7,7 @@
 #include <QOpenGLFunctions>
 #include <vector>
 #include "mainwindow.h"
+#include "qgifimage.h"
 
 class ModelViewer : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT
@@ -19,7 +20,10 @@ public:
 
     void saveFrameAsJpeg();
     void saveFrameAsBMP();
-    void saveFrameAsGif();
+    void startGif();
+    int getFrameCount();
+    void addFrameToGif();
+    void endGif(QString filepath);
 
     void rotate_ox(float corner){
 
@@ -158,7 +162,9 @@ protected:
 
 private:
     std::vector<Vector3> vertices; 
-    std::vector<Edge> edges;        
+    std::vector<Edge> edges;
+    QGifImage *gif;       
+    bool isRecord;
 };
 
 #endif // MODELVIEWER_H

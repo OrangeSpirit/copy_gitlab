@@ -49,10 +49,43 @@ void ModelViewer::saveFrameAsBMP() {
     }
 }
 
-void ModelViewer::saveFrameAsGif() {
-    ;
+void ModelViewer::startGif() {
+    gif = new QGifImage(QSize(640, 480));
+    gif->setDefaultDelay(100);
+    isRecord = true;
 }
 
+int ModelViewer::getFrameCount() {
+    if (isRecord) {
+        return gif->frameCount();
+    } else {
+        return -1;
+    }
+}
+
+void ModelViewer::addFrameToGif() {
+    if (!isRecord) {
+        return;
+    }
+
+    QImage image;
+    image = grabFramebuffer();
+    image = image.scaled(640, 480, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    gif->addFrame(image);
+}
+
+void ModelViewer::endGif(QString filepath) {
+    if (!isRecord) {
+        return;
+    }
+
+    if (!filepath.isEmpty()) {
+        filepath += ".gif";
+        gif->save(filepath);
+    }
+
+    delete gif;
+}
 
 void ModelViewer::initializeGL() {
     initializeOpenGLFunctions();
