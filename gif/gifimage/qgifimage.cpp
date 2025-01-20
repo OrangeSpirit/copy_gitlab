@@ -28,7 +28,6 @@
 #include <QImage>
 #include <QDebug>
 #include <QScopedPointer>
-#include "gif_lib.h"
 
 namespace
 {
