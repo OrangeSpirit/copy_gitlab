@@ -6,11 +6,12 @@ project(MyQtProject VERSION 1.0 LANGUAGES CXX)
 # Найти необходимые компоненты Qt
 find_package(Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets Core Gui REQUIRED)
 
-# Добавляем общий CMake файл для объединенной библиотеки
-add_subdirectory(gif)  # Добавление gif/ CMakeLists.txt, который собирает общую библиотеку
-
+# Установить стандарт C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Добавить поддиректорию со сборкой статической библиотеки
+add_subdirectory(gif)
 
 # Добавляем исполняемый файл
 add_executable(MyQtProject
@@ -20,9 +21,6 @@ add_executable(MyQtProject
     modelviewer.cc
 )
 
-# Линкуем проект с объединенной библиотекой gif
-target_link_libraries(MyQtProject PRIVATE gif)
-
 # Связать Qt библиотеки
 target_link_libraries(MyQtProject PRIVATE
     Qt6::Widgets
@@ -30,6 +28,7 @@ target_link_libraries(MyQtProject PRIVATE
     Qt6::OpenGLWidgets
     Qt6::Core
     Qt6::Gui
+    ${CMAKE_CURRENT_SOURCE_DIR}/gif/libgif.a
 )
 
 # Указать свойства для автоматической обработки Qt

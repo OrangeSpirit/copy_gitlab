@@ -7,7 +7,7 @@
 #include <QOpenGLFunctions>
 #include <vector>
 #include "mainwindow.h"
-#include "qgifimage.h"
+#include "gif/qgifimage.h"
 
 class ModelViewer : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT
