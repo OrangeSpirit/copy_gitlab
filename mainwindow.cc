@@ -1,15 +1,12 @@
 #include "mainwindow.h"
-
-#include <QLabel>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QDebug>
 #include "parser.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     fileNameEdit(new QLineEdit(nullptr)),
-    moveSliderX(new QSlider(Qt::Horizontal, this)),
-    moveSliderY(new QSlider(Qt::Horizontal, this)),
+    moveXEdit(new QLineEdit(this)),
+    moveYEdit(new QLineEdit(this)),
+    moveZEdit(new QLineEdit(this)),
+    moveModelButton(new QPushButton("Move Model", this)),
     modelViewer(new ModelViewer(this)),
     rotateXEdit(new QLineEdit(this)),
     rotateYEdit(new QLineEdit(this)),
@@ -17,10 +14,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     rotateModelButton(new QPushButton("Rotate Model", nullptr)),
     scaleEdit(new QLineEdit(this)),
     scaleModelButton(new QPushButton("Scale Model", nullptr)),
+    selectFileButton(new QPushButton("Select model file", this)),
+    applyLineWidthButton(new QPushButton("Apply Line Width", nullptr)),
+    lineStyleComboBox(new QComboBox(nullptr)),
+    changeEdgeColorButton(new QPushButton("Change Edge Color", this)),
+    vertexColorButton(new QPushButton("Change Vertex Color", this)),
+    lineWidthEdit(new QLineEdit("1.0", this)),
+    vertexSizeEdit(new QLineEdit(this)),
+    changeVertexSizeButton(new QPushButton("Change Vertex Size", this)),
     timer(new QTimer(this))
 {
     setWindowTitle("3D Viewer");
-    resize(1600, 1600); 
+    resize(1600, 1600);
     setupUI();
 
     connect(timer, SIGNAL(timeout()), this, SLOT(update_gif()));
@@ -29,39 +34,41 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 MainWindow::~MainWindow() {}
 
 void MainWindow::createFileSelectionUI(QVBoxLayout* layout) {
-    fileNameEdit = new QLineEdit(this);
     fileNameEdit->setPlaceholderText("File name");
 
-    fileNameLabel = new QLabel("File: Not selected", this);   
-    vertexCountLabel = new QLabel("Vertices: 0", this);          
-    edgeCountLabel = new QLabel("Edges: 0", this);              
+    fileNameLabel = new QLabel("File: Not selected", this);
+    vertexCountLabel = new QLabel("Vertices: 0", this);
+    edgeCountLabel = new QLabel("Edges: 0", this);
 
-    QPushButton *selectFileButton = new QPushButton("Select model file", this);
     connect(selectFileButton, &QPushButton::clicked, this, &MainWindow::onSelectFileClicked);
 
     layout->addWidget(fileNameEdit);
-    layout->addSpacing(10); 
-
+    layout->addSpacing(10);
     layout->addWidget(selectFileButton);
-    layout->addWidget(fileNameLabel);       
-    layout->addWidget(vertexCountLabel);    
-    layout->addWidget(edgeCountLabel); 
+    layout->addWidget(fileNameLabel);
+    layout->addWidget(vertexCountLabel);
+    layout->addWidget(edgeCountLabel);
 }
-
 
 void MainWindow::createMoveUI(QVBoxLayout* layout) {
     QLabel *moveLabelX = new QLabel("Move X:", this);
-    moveSliderX->setRange(-2, 2);
-    connect(moveSliderX, &QSlider::valueChanged, this, &MainWindow::onMoveModelButtonClicked);
+    moveXEdit->setPlaceholderText("0");
 
     QLabel *moveLabelY = new QLabel("Move Y:", this);
-    moveSliderY->setRange(-2, 2);
-    connect(moveSliderY, &QSlider::valueChanged, this, &MainWindow::onMoveModelButtonClicked);
+    moveYEdit->setPlaceholderText("0");
+
+    QLabel *moveLabelZ = new QLabel("Move Z:", this);
+    moveZEdit->setPlaceholderText("0");
+
+    connect(moveModelButton, &QPushButton::clicked, this, &MainWindow::onMoveModelButtonClicked);
 
     layout->addWidget(moveLabelX);
-    layout->addWidget(moveSliderX);
+    layout->addWidget(moveXEdit);
     layout->addWidget(moveLabelY);
-    layout->addWidget(moveSliderY);
+    layout->addWidget(moveYEdit);
+    layout->addWidget(moveLabelZ);
+    layout->addWidget(moveZEdit);
+    layout->addWidget(moveModelButton);
 }
 
 void MainWindow::createRotateUI(QVBoxLayout* layout) {
@@ -74,7 +81,6 @@ void MainWindow::createRotateUI(QVBoxLayout* layout) {
     QLabel *rotateLabelZ = new QLabel("Rotate Z (degrees):", this);
     rotateZEdit->setPlaceholderText("0");
 
-    rotateModelButton = new QPushButton("Rotate Model", this);
     connect(rotateModelButton, &QPushButton::clicked, this, &MainWindow::onRotateModelButtonClicked);
 
     layout->addWidget(rotateLabelX);
@@ -90,12 +96,43 @@ void MainWindow::createScaleUI(QVBoxLayout* layout) {
     QLabel *scaleLabel = new QLabel("Scale (e.g., 1.0):", this);
     scaleEdit->setPlaceholderText("1.0");
 
-    scaleModelButton = new QPushButton("Scale Model", this);
     connect(scaleModelButton, &QPushButton::clicked, this, &MainWindow::onScaleModelButtonClicked);
 
     layout->addWidget(scaleLabel);
     layout->addWidget(scaleEdit);
     layout->addWidget(scaleModelButton);
+}
+
+void MainWindow::createBackgroundColorUI(QVBoxLayout *layout) {
+    changeBackgroundColorButton = new QPushButton("Change Background Color", this);
+    connect(changeBackgroundColorButton, &QPushButton::clicked, this, &MainWindow::onChangeBackgroundColor);
+    layout->addWidget(changeBackgroundColorButton);
+}
+
+void MainWindow::createEdgeSettingsUI(QVBoxLayout* layout) {
+    connect(applyLineWidthButton, &QPushButton::clicked, this, &MainWindow::onApplyLineWidthButtonClicked);
+
+    layout->addWidget(lineWidthEdit);
+    layout->addWidget(applyLineWidthButton);
+}
+
+
+void MainWindow::createTypeEdgeUI(QVBoxLayout* layout) {
+    lineStyleComboBox->addItem("Solid Line");
+    lineStyleComboBox->addItem("Dashed Line");
+
+    connect(lineStyleComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onApplyTypeEdgeButtonClicked(int)));
+
+    layout->addWidget(lineStyleComboBox);
+}
+
+void MainWindow::createVertexSizeUI(QVBoxLayout* layout) {
+    vertexSizeEdit->setPlaceholderText("1.0");
+
+    connect(changeVertexSizeButton, &QPushButton::clicked, this, &MainWindow::onChangeVertexSizeButtonClicked);
+
+    layout->addWidget(vertexSizeEdit);
+    layout->addWidget(changeVertexSizeButton);
 }
 
 void MainWindow::createScreenJpgUI(QVBoxLayout* layout) {
@@ -122,65 +159,93 @@ void MainWindow::setupUI() {
 
     QVBoxLayout *fileLayout = new QVBoxLayout();
     createFileSelectionUI(fileLayout);
-    layout->addLayout(fileLayout, 0, 0, 2, 1);
+    layout->addLayout(fileLayout, 0, 0, 1, 1);
 
-    modelViewer->setMinimumSize(800, 600);
-    layout->addWidget(modelViewer, 0, 1, 6, 1);  
+    modelViewer->setMinimumSize(800, 800);
+    layout->addWidget(modelViewer, 0, 2, 9, 1);
 
     QVBoxLayout *moveLayout = new QVBoxLayout();
     createMoveUI(moveLayout);
-    layout->addLayout(moveLayout, 2, 0, 1, 1); 
+    layout->addLayout(moveLayout, 1, 0, 1, 1);
 
     QVBoxLayout *rotateLayout = new QVBoxLayout();
     createRotateUI(rotateLayout);
-    layout->addLayout(rotateLayout, 3, 0, 1, 1); 
+    layout->addLayout(rotateLayout, 2, 0, 1, 1);
 
     QVBoxLayout *scaleLayout = new QVBoxLayout();
     createScaleUI(scaleLayout);
-    layout->addLayout(scaleLayout, 4, 0, 1, 1);
+    layout->addLayout(scaleLayout, 3, 0, 1, 1);
+
+    QVBoxLayout *backgroundColorLayout = new QVBoxLayout();
+    createBackgroundColorUI(backgroundColorLayout);
+    layout->addLayout(backgroundColorLayout, 5, 0, 1, 1);
+
+    QVBoxLayout *lineThicknessLayout = new QVBoxLayout();
+    createEdgeSettingsUI(lineThicknessLayout);
+    layout->addLayout(lineThicknessLayout, 0, 1, 1, 1);
+
+    QVBoxLayout *lineTypeLayout = new QVBoxLayout();
+    createTypeEdgeUI(lineTypeLayout);
+    layout->addLayout(lineTypeLayout, 1, 1, 1, 1);
+
+    connect(changeEdgeColorButton, &QPushButton::clicked, this, &MainWindow::onChangeEdgeColor);
+    layout->addWidget(changeEdgeColorButton, 2, 1, 1, 1);
+
+    connect(vertexColorButton, &QPushButton::clicked, this, &MainWindow::onChangeVertexColor);
+    layout->addWidget(vertexColorButton, 3, 1, 1, 1);
+
+    QVBoxLayout *vertexSizeLayout = new QVBoxLayout();
+    createVertexSizeUI(vertexSizeLayout);
+    layout->addLayout(vertexSizeLayout, 4, 0, 1, 1);
 
     QVBoxLayout *screenJpgLayout = new QVBoxLayout(); // Jpeg
     createScreenJpgUI(screenJpgLayout);
-    layout->addLayout(screenJpgLayout, 5, 0, 1, 1);
+    layout->addLayout(screenJpgLayout, 6, 0, 1, 1);
 
     QVBoxLayout *screenBMPLayout = new QVBoxLayout(); // BMP
     createScreenBMPUI(screenBMPLayout);
-    layout->addLayout(screenBMPLayout, 6, 0, 1, 1);
+    layout->addLayout(screenBMPLayout, 7, 0, 1, 1);
 
     QVBoxLayout *screenGifLayout = new QVBoxLayout(); // Gif
     createScreenGifUI(screenGifLayout);
-    layout->addLayout(screenGifLayout, 7, 0, 1, 1);
-    
-    layout->setRowStretch(1, 1);  
-    layout->setRowStretch(2, 1);
-    layout->setRowStretch(3, 1);
-    layout->setRowStretch(5, 1);
+    layout->addLayout(screenGifLayout, 8, 0, 1, 1);
 
-    
     adjustUIElements();
 
     centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
 }
 
-
 void MainWindow::adjustUIElements() {
     rotateModelButton->setFixedSize(100, 30);
     scaleModelButton->setFixedSize(100, 30);
-    moveSliderX->setFixedWidth(150);
-    moveSliderY->setFixedWidth(150);
+    moveModelButton->setFixedSize(100, 30);
+    changeBackgroundColorButton->setFixedSize(200, 30);
+    selectFileButton->setFixedSize(150, 30);
+    applyLineWidthButton->setFixedSize(150,30);
+    changeEdgeColorButton->setFixedSize(150,30);
+    vertexColorButton->setFixedSize(150,30);
+    changeVertexSizeButton->setFixedSize(150,30);
 
+    fileNameLabel->setWordWrap(true);
+    fileNameLabel->setFixedWidth(200);
     fileNameEdit->setFixedWidth(200);
+    moveXEdit->setFixedWidth(60);
+    moveYEdit->setFixedWidth(60);
+    moveZEdit->setFixedWidth(60);
     rotateXEdit->setFixedWidth(60);
     rotateYEdit->setFixedWidth(60);
     rotateZEdit->setFixedWidth(60);
     scaleEdit->setFixedWidth(60);
+    lineWidthEdit->setFixedWidth(60);
+    vertexSizeEdit->setFixedWidth(60);
 }
+
 
 // Обработка выбора файла
 void MainWindow::onSelectFileClicked()
 {
-    QString filePath = QFileDialog::getOpenFileName(this, "Open Model File", "", "Model Files (*.obj *.stl);;All Files (*)");
+    QString filePath = QFileDialog::getOpenFileName(this, "Open Model File", "", "Model Files (*.obj)");
     if (!filePath.isEmpty()) {
         fileNameEdit->setText(filePath);
 
@@ -198,17 +263,17 @@ void MainWindow::onSelectFileClicked()
         } else {
             qDebug() << "Ошибка парсинга файла.";
         }
-    }
+    } 
 }
 
 // Обработка перемещения модели
 void MainWindow::onMoveModelButtonClicked()
 {
-    int xValue = moveSliderX->value();
-    modelViewer->move_x(xValue);
-    int yValue = moveSliderY->value();
-     modelViewer->move_y(yValue);
-    qDebug() << "Move Model: X = " << xValue << ", Y = " << yValue;
+    float xValue = moveXEdit->text().toFloat();
+    float yValue = moveYEdit->text().toFloat();
+    float zValue = moveZEdit->text().toFloat();
+
+    qDebug() << "Move Model: X = " << xValue << ", Y = " << yValue << ", Z = " << zValue;
     modelViewer->update();
 }
 
@@ -216,15 +281,8 @@ void MainWindow::onMoveModelButtonClicked()
 void MainWindow::onRotateModelButtonClicked()
 {
     float rotateX = rotateXEdit->text().toFloat();
-    
-
-    modelViewer->rotate_ox (rotateX);
-
     float rotateY = rotateYEdit->text().toFloat();
-    
-    modelViewer->rotate_oy (rotateY);
     float rotateZ = rotateZEdit->text().toFloat();
-        modelViewer->rotate_oz (rotateZ);
 
     qDebug() << "Rotate Model: X = " << rotateX << ", Y = " << rotateY << ", Z = " << rotateZ;
     modelViewer->update();
@@ -234,9 +292,64 @@ void MainWindow::onRotateModelButtonClicked()
 void MainWindow::onScaleModelButtonClicked()
 {
     float scale = scaleEdit->text().toFloat();
-    modelViewer->scaling (scale);
     qDebug() << "Scale Model: Factor = " << scale;
     modelViewer->update();
+}
+
+
+void MainWindow::onChangeBackgroundColor() {
+    QColor color = QColorDialog::getColor(Qt::white, this, "Select Background Color");
+
+    if (color.isValid()) {
+        modelViewer->setBackgroundColor(color); 
+        qDebug() << "Background color changed to:" << color.name();
+    }
+}
+
+void MainWindow::onApplyLineWidthButtonClicked() {
+    bool ok;
+    float width = lineWidthEdit->text().toFloat(&ok);
+    if (ok) {
+        modelViewer->setLineWidth(width);
+    } else {
+        qDebug() << "Invalid line width!";
+    }
+}
+
+void MainWindow::onApplyTypeEdgeButtonClicked(int index) {
+    if (index == 0) { 
+        modelViewer->setLineStyle(Qt::SolidLine);
+    } else if (index == 1) {  
+        modelViewer->setLineStyle(Qt::DashLine);
+    }
+}
+
+void MainWindow::onChangeEdgeColor() {
+    QColor color = QColorDialog::getColor(Qt::black, this, "Select Edge Color"); 
+
+    if (color.isValid()) {
+        modelViewer->setEdgeColor(color);  
+        qDebug() << "Edge color changed to:" << color.name();
+    }
+}
+
+void MainWindow::onChangeVertexColor() {
+    QColor color = QColorDialog::getColor(Qt::white, this, "Select Vertex Color");
+
+    if (color.isValid()) {
+        modelViewer->setVertexColor(color); 
+        qDebug() << "Vertex color changed to:" << color.name();
+    }
+}
+
+void MainWindow::onChangeVertexSizeButtonClicked() {
+    bool ok;
+    float size = vertexSizeEdit->text().toFloat(&ok);
+    if (ok) {
+        modelViewer->setVertexSize(size);
+    } else {
+        qDebug() << "Invalid vertex size!";
+    }
 }
 
 // Скрин в формате Jpeg
@@ -275,3 +388,4 @@ void MainWindow::update_gif()
         timer->stop();
     }
 }
+

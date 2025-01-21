@@ -2,15 +2,19 @@
 #define MAINWINDOW_H
 
 #include <QVBoxLayout>
+#include <QFileDialog>
 #include <QLabel>
 #include <QMainWindow>
 #include <QLineEdit>
-#include <QSlider>
+#include <QDebug>
 #include <QPushButton>
-#include <QOpenGLWidget>
+#include <QOpenGLWidget>  
+#include <QColorDialog>
+#include <QComboBox>
+#include <QSlider>
 #include <QTimer>
-#include "parser.h"
-#include "modelviewer.h"
+#include "parser.h"    
+#include "modelviewer.h" 
 
 class ModelViewer; 
 
@@ -29,21 +33,32 @@ private slots:
     void onRotateModelButtonClicked();
     void onScaleModelButtonClicked();
 
+    void onChangeBackgroundColor();
+    void onApplyLineWidthButtonClicked();
+
+    void onApplyTypeEdgeButtonClicked(int index);
+    void onChangeEdgeColor();
+    void onChangeVertexColor();
+    void onChangeVertexSizeButtonClicked();
+
     void onScreenJpgButtonClicked();
     void onScreenBMPButtonClicked();
     void onScreenGifButtonClicked();
 
     void update_gif();
-
+ 
 private:
     QLabel *fileNameLabel;     
     QLabel *vertexCountLabel;   
     QLabel *edgeCountLabel; 
 
-    QLineEdit *fileNameEdit;  
-    QSlider *moveSliderX;  
-    QSlider *moveSliderY;     
+    QLineEdit *fileNameEdit;      
     ModelViewer *modelViewer;
+
+    QLineEdit *moveXEdit;
+    QLineEdit *moveYEdit;
+    QLineEdit *moveZEdit;
+    QPushButton *moveModelButton;
 
     QLineEdit *rotateXEdit;
     QLineEdit *rotateYEdit;
@@ -52,6 +67,21 @@ private:
 
     QLineEdit *scaleEdit;
     QPushButton *scaleModelButton;
+
+    QPushButton *changeBackgroundColorButton;
+
+    QPushButton *selectFileButton;
+
+    QLineEdit *lineWidthEdit;
+    QPushButton *applyLineWidthButton;
+
+    QComboBox *lineStyleComboBox;
+
+    QPushButton *changeEdgeColorButton;
+    QPushButton *vertexColorButton;
+
+    QLineEdit *vertexSizeEdit;
+    QPushButton *changeVertexSizeButton;
 
     QPushButton *screenJpgButton;
     QPushButton *screenBMPButton;
@@ -64,11 +94,14 @@ private:
     void createMoveUI(QVBoxLayout* layout);
     void createRotateUI(QVBoxLayout* layout);
     void createScaleUI(QVBoxLayout* layout);
+    void adjustUIElements();
+    void createBackgroundColorUI(QVBoxLayout *layout);
+    void createEdgeSettingsUI(QVBoxLayout* layout);
+    void createTypeEdgeUI(QVBoxLayout* layout);
+    void createVertexSizeUI(QVBoxLayout* layout);
     void createScreenJpgUI(QVBoxLayout* layout);
     void createScreenBMPUI(QVBoxLayout* layout);
     void createScreenGifUI(QVBoxLayout* layout);
-
-    void adjustUIElements();
 };
 
 #endif // MAINWINDOW_H
