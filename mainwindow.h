@@ -1,107 +1,106 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QVBoxLayout>
-#include <QFileDialog>
-#include <QLabel>
-#include <QMainWindow>
-#include <QLineEdit>
-#include <QDebug>
-#include <QPushButton>
-#include <QOpenGLWidget>  
 #include <QColorDialog>
 #include <QComboBox>
+#include <QDebug>
+#include <QFileDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QOpenGLWidget>
+#include <QPushButton>
 #include <QSlider>
 #include <QTimer>
-#include "parser.h"    
-#include "modelviewer.h" 
+#include <QVBoxLayout>
 
-class ModelViewer; 
+#include "modelviewer.h"
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class ModelViewer;
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
-private slots:
-    void onSelectFileClicked(); 
-    void onMoveModelButtonClicked();
+ public:
+  explicit MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
 
-    void onRotateModelButtonClicked();
-    void onScaleModelButtonClicked();
+ private slots:
+  void onSelectFileClicked();
+  void onMoveModelButtonClicked();
 
-    void onChangeBackgroundColor();
-    void onApplyLineWidthButtonClicked();
+  void onRotateModelButtonClicked();
+  void onScaleModelButtonClicked();
 
-    void onApplyTypeEdgeButtonClicked(int index);
-    void onChangeEdgeColor();
-    void onChangeVertexColor();
-    void onChangeVertexSizeButtonClicked();
+  void onChangeBackgroundColor();
+  void onApplyLineWidthButtonClicked();
 
-    void onScreenJpgButtonClicked();
-    void onScreenBMPButtonClicked();
-    void onScreenGifButtonClicked();
+  void onApplyTypeEdgeButtonClicked(int index);
+  void onChangeEdgeColor();
+  void onChangeVertexColor();
+  void onChangeVertexSizeButtonClicked();
 
-    void update_gif();
- 
-private:
-    QLabel *fileNameLabel;     
-    QLabel *vertexCountLabel;   
-    QLabel *edgeCountLabel; 
+  void onScreenJpgButtonClicked();
+  void onScreenBMPButtonClicked();
+  void onScreenGifButtonClicked();
 
-    QLineEdit *fileNameEdit;      
-    ModelViewer *modelViewer;
+  void update_gif();
 
-    QLineEdit *moveXEdit;
-    QLineEdit *moveYEdit;
-    QLineEdit *moveZEdit;
-    QPushButton *moveModelButton;
+ private:
+  QLabel *fileNameLabel;
+  QLabel *vertexCountLabel;
+  QLabel *edgeCountLabel;
 
-    QLineEdit *rotateXEdit;
-    QLineEdit *rotateYEdit;
-    QLineEdit *rotateZEdit;
-    QPushButton *rotateModelButton;
+  QLineEdit *fileNameEdit;
+  ModelViewer *modelViewer;
 
-    QLineEdit *scaleEdit;
-    QPushButton *scaleModelButton;
+  QLineEdit *moveXEdit;
+  QLineEdit *moveYEdit;
+  QLineEdit *moveZEdit;
+  QPushButton *moveModelButton;
 
-    QPushButton *changeBackgroundColorButton;
+  QLineEdit *rotateXEdit;
+  QLineEdit *rotateYEdit;
+  QLineEdit *rotateZEdit;
+  QPushButton *rotateModelButton;
 
-    QPushButton *selectFileButton;
+  QLineEdit *scaleEdit;
+  QPushButton *scaleModelButton;
 
-    QLineEdit *lineWidthEdit;
-    QPushButton *applyLineWidthButton;
+  QPushButton *changeBackgroundColorButton;
 
-    QComboBox *lineStyleComboBox;
+  QPushButton *selectFileButton;
 
-    QPushButton *changeEdgeColorButton;
-    QPushButton *vertexColorButton;
+  QLineEdit *lineWidthEdit;
+  QPushButton *applyLineWidthButton;
 
-    QLineEdit *vertexSizeEdit;
-    QPushButton *changeVertexSizeButton;
+  QComboBox *lineStyleComboBox;
 
-    QPushButton *screenJpgButton;
-    QPushButton *screenBMPButton;
-    QPushButton *screenGifButton;
+  QPushButton *changeEdgeColorButton;
+  QPushButton *vertexColorButton;
 
-    QTimer *timer;
+  QLineEdit *vertexSizeEdit;
+  QPushButton *changeVertexSizeButton;
 
-    void setupUI();
-    void createFileSelectionUI(QVBoxLayout* layout);
-    void createMoveUI(QVBoxLayout* layout);
-    void createRotateUI(QVBoxLayout* layout);
-    void createScaleUI(QVBoxLayout* layout);
-    void adjustUIElements();
-    void createBackgroundColorUI(QVBoxLayout *layout);
-    void createEdgeSettingsUI(QVBoxLayout* layout);
-    void createTypeEdgeUI(QVBoxLayout* layout);
-    void createVertexSizeUI(QVBoxLayout* layout);
-    void createScreenJpgUI(QVBoxLayout* layout);
-    void createScreenBMPUI(QVBoxLayout* layout);
-    void createScreenGifUI(QVBoxLayout* layout);
+  QPushButton *screenJpgButton;
+  QPushButton *screenBMPButton;
+  QPushButton *screenGifButton;
+
+  QTimer *timer;
+
+  void setupUI();
+  void createFileSelectionUI(QVBoxLayout *layout);
+  void createMoveUI(QVBoxLayout *layout);
+  void createRotateUI(QVBoxLayout *layout);
+  void createScaleUI(QVBoxLayout *layout);
+  void adjustUIElements();
+  void createBackgroundColorUI(QVBoxLayout *layout);
+  void createEdgeSettingsUI(QVBoxLayout *layout);
+  void createTypeEdgeUI(QVBoxLayout *layout);
+  void createVertexSizeUI(QVBoxLayout *layout);
+  void createScreenJpgUI(QVBoxLayout *layout);
+  void createScreenBMPUI(QVBoxLayout *layout);
+  void createScreenGifUI(QVBoxLayout *layout);
 };
 
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

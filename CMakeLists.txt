@@ -11,6 +11,8 @@ set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+#add_compile_options(-Wall -Wextra -Werror)
+
 add_subdirectory(gif)
 
 add_executable(3DViewer_v2.0
