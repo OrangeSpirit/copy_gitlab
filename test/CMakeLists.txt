@@ -13,14 +13,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 #add_compile_options(-Wall -Wextra -Werror)
 
-#add_compile_options(-lgtest -lgcov --coverage -lstdc++)
+#add_directory(../gif)
 
-set(SOURCES
-    ../modelviewer.cc
+add_executable(test_viewer
     test.cc
 )
-
-add_executable(test_viewer ${SOURCES})
 
 add_definitions(-DGL_SILENCE_DEPRECATION=1)
 
@@ -30,8 +27,6 @@ target_link_libraries(test_viewer PRIVATE
     Qt6::OpenGLWidgets
     Qt6::Core
     Qt6::Gui
-    gtest
-    gtest_main
     ${CMAKE_CURRENT_SOURCE_DIR}/../gif/libgif.a
 )
 

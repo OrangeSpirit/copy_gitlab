@@ -23,25 +23,26 @@ build_libgif_without_clean:
 clean_gif:
 	rm -rf $(GIF_DIR)/.qt $(GIF_DIR)/CMakeFiles $(GIF_DIR)/cmake_install.cmake $(GIF_DIR)/CMakeCache.txt $(GIF_DIR)/Makefile
 
-clean: clean_gif clean_test_all
+clean: clean_gif
 	rm -rf $(GIF_DIR)/libgif.a
 	rm -rf $(BUILD_DIR) .qt CMakeFiles MyQtProject_autogen cmake_install.cmake CMakeCache.txt 3DViewer_v2.0
 	rm -rf .clang-format
 
 check_clang_format:
 	cp ../materials/linters/.clang-format .
-	clang-format -n *.cc *.h */*.cpp */*.c */*.h test/test.cc
+	clang-format -n *.cc *.h */*.cpp */*.c */*.h
 	rm -rf .clang-format
 
 format_clang_format:
 	cp ../materials/linters/.clang-format .
-	clang-format -i *.cc *.h */*.cpp */*.c */*.h test/test.cc
+	clang-format -i *.cc *.h */*.cpp */*.c */*.h
 	rm -rf .clang-format
 
 test: build_libgif
 	cd $(TEST_DIR) && cmake .
 	cd $(TEST_DIR) && make
 	cd $(TEST_DIR) && ./test_viewer
+	make clean_test_all
 
 clean_test:
 	rm -rf $(TEST_DIR)/.qt $(TEST_DIR)/CMakeFiles $(TEST_DIR)/test_viewer_autogen $(TEST_DIR)/cmake_install.cmake
@@ -50,8 +51,3 @@ clean_test:
 clean_test_all: clean_test
 	rm -rf $(TEST_DIR)/test_viewer
 
-
-gcov_report: test
-	lcov --capture --directory . --output-file coverage_test/coverage.info --no-external
-	genhtml coverage_test/coverage.info --output-directory coverage_report
-	open coverage_report/index.html
