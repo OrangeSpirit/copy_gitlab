@@ -1,11 +1,13 @@
 #include "modelviewer.h"
 
-ModelViewer::ModelViewer(QWidget* parent) : QOpenGLWidget(parent) {}
+ModelViewer::ModelViewer(QWidget* parent) : QOpenGLWidget(parent) {
+  this->loadSettings();
+}
 
 void ModelViewer::setModelData(const std::vector<Vector3>& vertices,
                                const std::vector<Edge>& edges) {
-  this->vertices = vertices;
-  this->edges = edges;
+  this->_vertices = vertices;
+  this->_edges = edges;
   update();
 }
 
@@ -45,9 +47,11 @@ void ModelViewer::paintGL() {
   }
 
   glBegin(GL_LINES);
-  for (size_t i = 0; i < edges.size(); i++) {
-    const Vector3& v1 = vertices[edges[i].v1];
-    const Vector3& v2 = vertices[edges[i].v2];
+
+  for (size_t i = 0; i < _edges.size(); i++) {
+    const Vector3& v1 = _vertices[_edges[i].v1];
+    const Vector3& v2 = _vertices[_edges[i].v2];
+
     glVertex3f(v1.x, v1.y, v1.z);
     glVertex3f(v2.x, v2.y, v2.z);
   }
@@ -56,8 +60,8 @@ void ModelViewer::paintGL() {
   glColor3f(vertexColor.redF(), vertexColor.greenF(), vertexColor.blueF());
   glPointSize(vertexSize);
   glBegin(GL_POINTS);
-  for (size_t i = 0; i < vertices.size(); i++) {
-    const auto& vertex = vertices[i];
+  for (size_t i = 0; i < _vertices.size(); i++) {
+    const auto& vertex = _vertices[i];
     glVertex3f(vertex.x, vertex.y, vertex.z);
   }
 
@@ -169,77 +173,80 @@ void ModelViewer::endGif(QString filepath) {
   delete gif;
 }
 
-void ModelViewer::move_object(float x, float y, float z) {
-  for (size_t i = 0; i < this->vertices.size(); ++i) {
-    if (x != 0) this->vertices[i].x += x;
-    if (y != 0) this->vertices[i].y += y;
-    if (z != 0) this->vertices[i].z += z;
+void ModelViewer::loadSettings() {
+  QSettings settings("settings.ini", QSettings::IniFormat);
+
+  // Загрузка цвета фона
+  QString colorString =
+      settings.value("Settings/background_color", "#000000").toString();
+  this->backgroundColor = QColor(colorString);
+
+  // Загрузка ширины линии
+  float lineWidth = settings.value("Settings/line_width", 1.0f).toFloat();
+  // Установка значения
+  this->lineWidth = lineWidth;
+
+  // Загрузка стиля линии
+  QString lineStyleString =
+      settings.value("Settings/line_style", "SolidLine").toString();
+  if (lineStyleString == "SolidLine") {
+    this->lineStyle = Qt::SolidLine;
+  } else if (lineStyleString == "DashLine") {
+    this->lineStyle = Qt::DashLine;
+  } else if (lineStyleString == "DotLine") {
+    this->lineStyle = Qt::DotLine;
+  } else {
+    this->lineStyle = Qt::SolidLine;  // значение по умолчанию
   }
+
+  // Загрузка цвета границ
+  QString edgeColorString =
+      settings.value("Settings/edge_color", "white").toString();
+  this->edgeColor = QColor(edgeColorString);
+
+  // Загрузка цвета вершин
+  QString vertexColorString =
+      settings.value("Settings/vertex_color", "red").toString();
+  this->vertexColor = QColor(vertexColorString);
+
+  // Загрузка размера вершин
+  float vertexSize = settings.value("Settings/vertex_size", 1.0f).toFloat();
+  this->vertexSize = vertexSize;
 }
 
-void ModelViewer::rotate_model(float x, float y, float z) {
-  double rad_x = x * M_PI / 180.0;
-  double rad_y = y * M_PI / 180.0;
-  double rad_z = z * M_PI / 180.0;
+void ModelViewer::saveSettings() {
+  QSettings settings("settings.ini", QSettings::IniFormat);
 
-  // Находим центр объекта
-  float sumX = 0, sumY = 0, sumZ = 0;
-  for (size_t i = 0; i < this->vertices.size(); ++i) {
-    sumX += this->vertices[i].x;
-    sumY += this->vertices[i].y;
-    sumZ += this->vertices[i].z;
+  // Сохранение цвета фона
+  settings.setValue("Settings/background_color", this->backgroundColor.name());
+
+  // Сохранение ширины линии
+  settings.setValue("Settings/line_width", this->lineWidth);
+
+  // Сохранение стиля линии
+  QString lineStyleString;
+  switch (this->lineStyle) {
+    case Qt::SolidLine:
+      lineStyleString = "SolidLine";
+      break;
+    case Qt::DashLine:
+      lineStyleString = "DashLine";
+      break;
+    case Qt::DotLine:
+      lineStyleString = "DotLine";
+      break;
+    default:
+      lineStyleString = "SolidLine";  // значение по умолчанию
+      break;
   }
-  float centerX = sumX / this->vertices.size();
-  float centerY = sumY / this->vertices.size();
-  float centerZ = sumZ / this->vertices.size();
+  settings.setValue("Settings/line_style", lineStyleString);
 
-  for (size_t i = 0; i < this->vertices.size(); ++i) {
-    float startX = this->vertices[i].x - centerX;
-    float startY = this->vertices[i].y - centerY;
-    float startZ = this->vertices[i].z - centerZ;
+  // Сохранение цвета границ
+  settings.setValue("Settings/edge_color", this->edgeColor.name());
 
-    if (x != 0) {
-      // Поворот OX точки относительно центра
-      float newStartY = startY * cos(rad_x) - startZ * sin(rad_x);
-      float newStartZ = startY * sin(rad_x) + startZ * cos(rad_x);
+  // Сохранение цвета вершин
+  settings.setValue("Settings/vertex_color", this->vertexColor.name());
 
-      // Обновление координат точки после поворота
-      this->vertices[i].y = newStartY + centerY;
-      this->vertices[i].z = newStartZ + centerZ;
-    }
-
-    if (y != 0) {
-      // Поворот OY точки относительно центра
-      float newStartX = startX * cos(rad_y) + startZ * sin(rad_y);
-      float newStartZ = -startX * sin(rad_y) + startZ * cos(rad_y);
-
-      // Обновление координат точки после поворота
-      this->vertices[i].x = newStartX + centerX;
-      this->vertices[i].z = newStartZ + centerZ;
-    }
-    if (z != 0) {
-      // Поворот OZ точки относительно центра
-      float newStartX = startX * cos(rad_z) - startY * sin(rad_z);
-      float newStartY = startX * sin(rad_z) + startY * cos(rad_z);
-
-      // Обновление координат точки после поворота
-      this->vertices[i].x = newStartX + centerX;
-      this->vertices[i].y = newStartY + centerY;
-    }
-  }
-}
-
-// Масштабирование объекта
-void ModelViewer::scaling(float size) {
-  for (size_t i = 0; i < this->vertices.size(); ++i) {
-    if (size > 0) {
-      this->vertices[i].x *= size;
-      this->vertices[i].y *= size;
-      this->vertices[i].z *= size;
-    } else if (size < 0) {
-      this->vertices[i].x *= 1 / abs(size);
-      this->vertices[i].y *= 1 / abs(size);
-      this->vertices[i].z *= 1 / abs(size);
-    }
-  }
+  // Сохранение размера вершин
+  settings.setValue("Settings/vertex_size", this->vertexSize);
 }

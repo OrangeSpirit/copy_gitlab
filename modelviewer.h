@@ -3,18 +3,19 @@
 
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
+#include <QSettings>
 #include <vector>
 
+#include "controller.h"
 #include "gif/qgifimage.h"
 #include "mainwindow.h"
-#include "parser.h"
 
 class ModelViewer : public QOpenGLWidget, protected QOpenGLFunctions {
   Q_OBJECT
 
  public:
   ModelViewer(QWidget* parent = nullptr);
-  ~ModelViewer() = default;
+  ~ModelViewer() { this->saveSettings(); };
 
   void setModelData(const std::vector<Vector3>& vertices,
                     const std::vector<Edge>& edges);
@@ -33,19 +34,17 @@ class ModelViewer : public QOpenGLWidget, protected QOpenGLFunctions {
   void addFrameToGif();
   void endGif(QString filepath);
 
-  void move_object(float x, float y, float z);
-  void rotate_model(float x, float y, float z);
-  void scaling(float size);
-
  protected:
   void initializeGL() override;
   void resizeGL(int w, int h) override;
   void paintGL() override;
 
  private:
-  std::vector<Vector3> vertices;
-  std::vector<Edge> edges;
-
+  s21::_3DViewer_controller* controller;
+  std::vector<Vector3> _vertices;
+  std::vector<Edge> _edges;
+  void loadSettings();
+  void saveSettings();
   QGifImage* gif;
   bool isRecord;
   QColor backgroundColor = QColor(0, 0, 0);

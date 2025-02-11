@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
+#include "controller.h"
 #include "modelviewer.h"
 
 class ModelViewer;
@@ -22,7 +23,8 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(s21::_3DViewer_controller *controller,
+                      QWidget *parent = nullptr);
   ~MainWindow();
 
  private slots:
@@ -53,6 +55,7 @@ class MainWindow : public QMainWindow {
 
   QLineEdit *fileNameEdit;
   ModelViewer *modelViewer;
+  s21::_3DViewer_controller *controller;
 
   QLineEdit *moveXEdit;
   QLineEdit *moveYEdit;

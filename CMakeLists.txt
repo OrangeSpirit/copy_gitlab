@@ -18,8 +18,9 @@ add_subdirectory(gif)
 add_executable(3DViewer_v2.0
     main.cc        
     mainwindow.cc  
-    parser.cc 
+    model.cc 
     modelviewer.cc
+    controller.cc
 )
 
 add_definitions(-DGL_SILENCE_DEPRECATION=1)

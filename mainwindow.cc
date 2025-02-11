@@ -1,9 +1,10 @@
 #include "mainwindow.h"
 
-#include "parser.h"
+#include "model.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(s21::_3DViewer_controller *_controller, QWidget *parent)
     : QMainWindow(parent),
+      controller(_controller),
       fileNameEdit(new QLineEdit(nullptr)),
       moveXEdit(new QLineEdit(this)),
       moveYEdit(new QLineEdit(this)),
@@ -259,20 +260,22 @@ void MainWindow::adjustUIElements() {
 void MainWindow::onSelectFileClicked() {
   QString filePath = QFileDialog::getOpenFileName(this, "Open Model File", "",
                                                   "Model Files (*.obj)");
+
   if (!filePath.isEmpty()) {
     fileNameEdit->setText(filePath);
 
-    ObjParser parser;
-    if (parser.parse(filePath.toStdString())) {
+    if (controller->load_obj_from_file(filePath.toStdString()) == true) {
       qDebug() << "Файл успешно распарсен!";
-      const auto &vertices = parser.getVertices();
-      const auto &edges = parser.getEdges();
-      modelViewer->setModelData(vertices, edges);
+
+      modelViewer->setModelData(controller->getVertices(),
+                                controller->getEdges());
 
       fileNameLabel->setText("File: " + filePath);
-      vertexCountLabel->setText("Vertices: " +
-                                QString::number(vertices.size()));
-      edgeCountLabel->setText("Edges: " + QString::number(edges.size()));
+      vertexCountLabel->setText(
+          "Vertices: " + QString::number(controller->getVerticesCount()));
+      edgeCountLabel->setText("Edges: " +
+                              QString::number(controller->getEdgesCount()));
+
       modelViewer->update();
     } else {
       qDebug() << "Ошибка парсинга файла.";
@@ -285,7 +288,9 @@ void MainWindow::onMoveModelButtonClicked() {
   float xValue = moveXEdit->text().toFloat();
   float yValue = moveYEdit->text().toFloat();
   float zValue = moveZEdit->text().toFloat();
-  modelViewer->move_object(xValue, yValue, zValue);
+
+  controller->move_object(xValue, yValue, zValue);
+  modelViewer->setModelData(controller->getVertices(), controller->getEdges());
   modelViewer->update();
 }
 
@@ -294,14 +299,16 @@ void MainWindow::onRotateModelButtonClicked() {
   float rotateX = rotateXEdit->text().toFloat();
   float rotateY = rotateYEdit->text().toFloat();
   float rotateZ = rotateZEdit->text().toFloat();
-  modelViewer->rotate_model(rotateX, rotateY, rotateZ);
+  controller->rotate_model(rotateX, rotateY, rotateZ);
+  modelViewer->setModelData(controller->getVertices(), controller->getEdges());
   modelViewer->update();
 }
 
 // Обработка масштабирования модели
 void MainWindow::onScaleModelButtonClicked() {
   float scale = scaleEdit->text().toFloat();
-  modelViewer->scaling(scale);
+  controller->scaling(scale);
+  modelViewer->setModelData(controller->getVertices(), controller->getEdges());
   modelViewer->update();
 }
 
